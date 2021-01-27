@@ -35,13 +35,17 @@ def main():
     pytrellis.load_database("../../../database")
 
     def per_job(job):
-        def get_substs(settings, mode="ALU54B"):
+        def get_substs(settings=None, signals=None, mode="ALU54B"):
             if mode == "NONE":
                 comment = "//"
             else:
                 comment = ""
+            if settings is None:
+                settings = {}
+            if signals is None:
+                signals = {}
             return dict(loc=loc, mode=mode, settings=",".join(["{}={}".format(k, v) for k, v in settings.items()]),
-                        comment=comment)
+                        signals=",".join(["{}={}".format(k, v) for k, v in signals.items()]), comment=comment)
 
         loc, mult, cfg = job
         cfg.setup()
@@ -73,6 +77,10 @@ def main():
         for clk in ["CLK0", "CLK1", "CLK2", "CLK3"]:
             nonrouting.fuzz_enum_setting(cfg, "{}.{}_DIV".format(mult, clk), ["ENABLED", "DISABLED"],
                                          lambda x: get_substs(settings={"{}_DIV".format(clk): x}), empty_bitfile, False)
+
+        nonrouting.fuzz_word_setting(cfg, "{}.DYN_OPR_INV".format(mult), 11,
+                                     lambda x: get_substs(signals={"OP{}".format(n): 0 if x[n] else 1 for n in range(11)}),
+                                     empty_bitfile)
 
         nonrouting.fuzz_enum_setting(cfg, "{}.MCPAT_SOURCE".format(mult), ["STATIC", "DYNAMIC"],
                                      lambda x: get_substs(settings={"MCPAT_SOURCE": x}), empty_bitfile, False)

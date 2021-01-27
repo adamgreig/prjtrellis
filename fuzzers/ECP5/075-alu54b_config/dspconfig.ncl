@@ -8,12 +8,12 @@ design top
       package CABGA381;
       performance "8";
    }
-   ${comment} comp MULT
+   ${comment} comp ALU
    ${comment} {
    ${comment}    logical {
    ${comment}       cellmodel-name ALU54;
    ${comment}       program "MODE:${mode} "
-   ${comment}               "${mode}:::${settings}";
+   ${comment}               "${mode}:::${settings}:${signals}";
    ${comment}    }
    ${comment}    site ${loc};
    ${comment} }
